@@ -1,54 +1,54 @@
 import { z } from "zod";
 
-function computeServerUrl(): string | undefined {
-  const explicit = process.env.VITE_SERVER_URL;
-  if (explicit && /^https?:\/\//.test(explicit)) {
-    return explicit.replace(/\/+$/, "");
+// Auto-detect server URL from platform env vars, fallback to localhost in dev
+function getServerUrl(): string {
+  // Explicit override
+  if (process.env.VITE_SERVER_URL) {
+    return process.env.VITE_SERVER_URL.replace(/\/+$/, "");
   }
-  const vercelHost = process.env.VERCEL_URL;
-  if (vercelHost) {
-    return `https://${vercelHost}`.replace(/\/+$/, "");
+
+  // Vercel production URL (if available)
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    const url = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    return url.startsWith("http") ? url : `https://${url}`;
   }
-  const railwayDomain =
-    process.env.RAILWAY_PUBLIC_DOMAIN ||
-    process.env.RAILWAY_STATIC_URL ||
-    process.env.RAILWAY_URL;
-  if (railwayDomain) {
-    const hasProtocol = /^https?:\/\//.test(railwayDomain);
-    const url = hasProtocol ? railwayDomain : `https://${railwayDomain}`;
-    return url.replace(/\/+$/, "");
+
+  // Vercel branch/preview URL
+  if (process.env.VERCEL_BRANCH_URL) {
+    const url = process.env.VERCEL_BRANCH_URL;
+    return url.startsWith("http") ? url : `https://${url}`;
   }
-  const renderUrl = process.env.RENDER_EXTERNAL_URL;
-  if (renderUrl) {
-    return renderUrl.replace(/\/+$/, "");
+
+  // Vercel fallback (always available)
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
   }
-  if (process.env.NODE_ENV !== "production") {
-    return "http://localhost:8080";
+
+  // Railway
+  if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+    return `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`;
   }
-  return undefined;
+
+  // Render
+  if (process.env.RENDER_EXTERNAL_URL) {
+    return process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, "");
+  }
+
+  // Local dev fallback
+  return "http://localhost:8080";
 }
 
-const Parsed = z
+const parsed = z
   .object({
     DATABASE_URL: z.string(),
-    VITE_SERVER_URL: z
-      .string()
-      .optional()
-      .transform(() => computeServerUrl())
-      .refine(
-        (val): val is string => typeof val === "string" && val.length > 0,
-        {
-          message:
-            "VITE_SERVER_URL is required or must be derivable from platform env (VERCEL_URL / RENDER_EXTERNAL_URL / RAILWAY_*).",
-        }
-      ),
     BETTER_AUTH_SECRET: z.string(),
     UPSTASH_REDIS_REST_URL: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
   })
   .parse(process.env);
 
+// VITE_SERVER_URL is auto-computed from platform env vars (used in prefetch-images and auth/server)
 export const env = {
-  ...Parsed,
-  VITE_SERVER_URL: Parsed.VITE_SERVER_URL,
+  ...parsed,
+  VITE_SERVER_URL: getServerUrl(),
 };
