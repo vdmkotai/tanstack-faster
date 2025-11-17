@@ -13,7 +13,7 @@ export default defineConfig({
     tsconfigPaths(),
     tailwindcss(),
     tanstackStart(),
-    nitro({ preset: "bun" }),
+    nitro(),
     viteReact(),
   ],
 });
