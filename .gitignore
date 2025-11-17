@@ -57,3 +57,4 @@ temp
 .prod.vars
 .nitro
 .output
+.vercel

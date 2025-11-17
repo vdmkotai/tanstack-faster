@@ -27,7 +27,6 @@ This project uses PostgreSQL, Redis and a sharp server for image optimization. E
 2. **Set up databases**
 
    See detailed guides:
-
    - **[NEON-UPSTASH-SETUP.md](./NEON-UPSTASH-SETUP.md)** - For cloud databases (Neon + Upstash)
    - **[SETUP.md](./SETUP.md)** - For local databases (Docker)
 
@@ -96,3 +95,4 @@ pnpm check-types      # TypeScript type checking
 ## 📝 License
 
 MIT
+dafsadfsdf
