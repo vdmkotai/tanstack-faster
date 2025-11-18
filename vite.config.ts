@@ -13,7 +13,13 @@ export default defineConfig({
     tsconfigPaths(),
     tailwindcss(),
     tanstackStart(),
-    nitro(),
+    nitro({
+      vercel: {
+        functions: {
+          runtime: "bun1.x",
+        },
+      },
+    }),
     viteReact(),
   ],
 });
