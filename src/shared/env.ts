@@ -10,8 +10,11 @@ function getServerUrl(): ServerUrlResult {
   const normalize = (url: string): string =>
     url.startsWith("http") ? url : `https://${url}`;
 
-  if (process.env.VERCEL_URL) {
-    return { source: "VERCEL_URL", url: normalize(process.env.VERCEL_URL) };
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return {
+      source: "VERCEL_PROJECT_PRODUCTION_URL",
+      url: normalize(process.env.VERCEL_PROJECT_PRODUCTION_URL),
+    };
   }
 
   if (process.env.VERCEL_BRANCH_URL) {
@@ -21,13 +24,11 @@ function getServerUrl(): ServerUrlResult {
     };
   }
 
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return {
-      source: "VERCEL_PROJECT_PRODUCTION_URL",
-      url: normalize(process.env.VERCEL_PROJECT_PRODUCTION_URL),
-    };
-  }
+  // if (process.env.VERCEL_URL) {
+  //   return { source: "VERCEL_URL", url: normalize(process.env.VERCEL_URL) };
+  // }
 
+  // THIS WORKS FINE ON RAILWAY
   if (process.env.RAILWAY_PUBLIC_DOMAIN) {
     return {
       source: "RAILWAY_PUBLIC_DOMAIN",
