@@ -1,4 +1,3 @@
 {
-  "buildCommand": "bun run build",
-  "outputDirectory": ".output/public"
+  "bunVersion": "1.x"
 }

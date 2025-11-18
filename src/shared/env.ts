@@ -3,23 +3,35 @@ import { z } from "zod";
 // Auto-detect server URL from platform env vars, fallback to localhost in dev
 function getServerUrl(): string {
   // Explicit override
-  if (process.env.VITE_SERVER_URL) {
-    return process.env.VITE_SERVER_URL.replace(/\/+$/, "");
-  }
+  // if (process.env.VITE_SERVER_URL) {
+  //   return process.env.VITE_SERVER_URL.replace(/\/+$/, "");
+  // }
 
-  // Vercel production URL (if available)
+  // // Vercel production URL (if available)
+  // if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+  //   const url = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  //   return url.startsWith("http") ? url : `https://${url}`;
+  // }
+
+  // // Vercel branch/preview URL
+  // if (process.env.VERCEL_BRANCH_URL) {
+  //   const url = process.env.VERCEL_BRANCH_URL;
+  //   return url.startsWith("http") ? url : `https://${url}`;
+  // }
+
+  // // Vercel fallback (always available)
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    const url = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-    return url.startsWith("http") ? url : `https://${url}`;
+    return process.env.VERCEL_PROJECT_PRODUCTION_URL.startsWith("http")
+      ? process.env.VERCEL_PROJECT_PRODUCTION_URL
+      : `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   }
 
-  // Vercel branch/preview URL
   if (process.env.VERCEL_BRANCH_URL) {
-    const url = process.env.VERCEL_BRANCH_URL;
-    return url.startsWith("http") ? url : `https://${url}`;
+    return process.env.VERCEL_BRANCH_URL.startsWith("http")
+      ? process.env.VERCEL_BRANCH_URL
+      : `https://${process.env.VERCEL_BRANCH_URL}`;
   }
 
-  // Vercel fallback (always available)
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
@@ -29,10 +41,10 @@ function getServerUrl(): string {
     return `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`;
   }
 
-  // Render
-  if (process.env.RENDER_EXTERNAL_URL) {
-    return process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, "");
-  }
+  // // Render
+  // if (process.env.RENDER_EXTERNAL_URL) {
+  //   return process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, "");
+  // }
 
   // Local dev fallback
   return "http://localhost:8080";
