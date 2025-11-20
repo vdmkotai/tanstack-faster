@@ -1,3 +1,4 @@
+import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
 type ServerUrlResult = {
@@ -39,36 +40,32 @@ function getServerUrl(): ServerUrlResult {
   return { source: "localhost", url: "http://localhost:8080" };
 }
 
-const parsed = z
-  .object({
-    DATABASE_URL: z.string(),
-    BETTER_AUTH_SECRET: z.string(),
-    UPSTASH_REDIS_REST_URL: z.string(),
-    UPSTASH_REDIS_REST_TOKEN: z.string(),
-  })
-  .parse(process.env);
+const serverUrlResult = getServerUrl();
+const defaultServerUrl = serverUrlResult.url;
 
-const serverUrl = getServerUrl();
-
-if (typeof window === "undefined") {
+if (typeof window === "undefined" && !process.env.VITE_SERVER_URL) {
   console.info(
-    `[env] VITE_SERVER_URL resolved from ${serverUrl.source}: ${serverUrl.url}`
+    `[env] VITE_SERVER_URL resolved from ${serverUrlResult.source}: ${serverUrlResult.url}`
   );
 }
 
-// VITE_SERVER_URL is auto-computed from platform env vars (used in prefetch-images and auth/server)
-export const env = {
-  ...parsed,
-  VITE_SERVER_URL: serverUrl.url,
-};
-
-// // import { z } from "zod";
-// export const env = z
-//   .object({
-//     DATABASE_URL: z.string(),
-//     VITE_SERVER_URL: z.string(),
-//     BETTER_AUTH_SECRET: z.string(),
-//     UPSTASH_REDIS_REST_URL: z.string(),
-//     UPSTASH_REDIS_REST_TOKEN: z.string(),
-//   })
-//   .parse(process.env);
+export const env = createEnv({
+  server: {
+    DATABASE_URL: z.url(),
+    BETTER_AUTH_SECRET: z.string(),
+    UPSTASH_REDIS_REST_URL: z.url(),
+    UPSTASH_REDIS_REST_TOKEN: z.string(),
+  },
+  clientPrefix: "VITE_",
+  client: {
+    VITE_SERVER_URL: z.url(),
+  },
+  runtimeEnv: {
+    DATABASE_URL: process.env.DATABASE_URL,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    VITE_SERVER_URL: process.env.VITE_SERVER_URL || defaultServerUrl,
+  },
+  emptyStringAsUndefined: true,
+});
